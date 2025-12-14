@@ -49,13 +49,13 @@ pip install copier
 
 ```bash
 # このリポジトリをクローン
-git clone https://github.com/your-org/saas-boilerplate.git
+git clone https://github.com/hexylab/saas-boilerplate.git
 
 # Copierでプロジェクトを生成
 copier copy ./saas-boilerplate ~/my-project
 
-# または直接GitHubから（リポジトリ公開後）
-copier copy gh:your-org/saas-boilerplate ~/my-project
+# または直接GitHubから
+copier copy gh:hexylab/saas-boilerplate ~/my-project
 ```
 
 ### 3. 対話形式で設定
@@ -66,9 +66,16 @@ copier copy gh:your-org/saas-boilerplate ~/my-project
 ? プロジェクトの説明 AI駆動開発に最適化されたSaaSアプリケーション
 ? 作者名 Your Name
 ? 作者のメールアドレス you@example.com
-? AWSリージョン ap-northeast-1
 ? 使用するAI Codingエージェント Claude Code + GitHub Copilot
+? Playwright E2Eテストを含めますか？ No
+? Cognito認証アダプター（本番用）を含めますか？ No
+? S3ストレージアダプターを含めますか？ No
+? AWS CDKインフラを含めますか？ No
+? 詳細ドキュメント構造を含めますか？ No
+? PRチェックワークフローを含めますか？ No
 ```
+
+※ AWS関連オプション（Cognito/CDK）を選択した場合のみ、AWSリージョンの選択が表示されます。
 
 ### 4. 生成されたプロジェクトをセットアップ
 

@@ -1,0 +1,41 @@
+# Configuration for actions/labeler
+# https://github.com/actions/labeler
+
+# Frontend changes
+frontend:
+  - changed-files:
+      - any-glob-to-any-file: 'frontend/**/*'
+
+# Backend changes
+backend:
+  - changed-files:
+      - any-glob-to-any-file: 'backend/**/*'
+{% if include_infrastructure %}
+
+# Infrastructure changes
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file: 'infrastructure/**/*'
+{% endif %}
+
+# Documentation changes
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**/*'
+          - '*.md'
+
+# CI/CD changes
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/**/*'
+
+# Test changes
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'frontend/tests/**/*'
+{% if include_e2e_tests %}
+          - 'frontend/e2e/**/*'
+{% endif %}
+          - 'backend/tests/**/*'

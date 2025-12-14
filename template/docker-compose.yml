@@ -26,7 +26,9 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-app}
       AUTH_PROVIDER: ${AUTH_PROVIDER:-mock}
+{% if include_storage_adapter %}
       STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+{% endif %}
       LOG_HANDLER: ${LOG_HANDLER:-console}
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
@@ -34,7 +36,9 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/src:/app/src:ro
+{% if include_storage_adapter %}
       - backend_storage:/app/storage
+{% endif %}
     depends_on:
       db:
         condition: service_healthy
@@ -59,4 +63,6 @@ services:
 
 volumes:
   postgres_data:
+{% if include_storage_adapter %}
   backend_storage:
+{% endif %}

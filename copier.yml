@@ -121,10 +121,11 @@ _exclude:
   # Extended docs
   - "{{ 'docs/frontend' if not include_extended_docs }}"
   - "{{ 'docs/backend' if not include_extended_docs }}"
-  - "{{ 'docs/infrastructure' if not include_extended_docs }}"
+  - "{{ 'docs/infrastructure' if not include_extended_docs or not include_infrastructure }}"
   - "{{ 'docs/operations' if not include_extended_docs }}"
   # PR checks workflow
   - "{{ '.github/workflows/pr-check.yml' if not include_pr_checks }}"
+  - "{{ '.github/labeler.yml' if not include_pr_checks }}"
   # Copilot instructions (based on ai_coding_agent)
   - "{{ '.github/copilot-instructions.md' if ai_coding_agent == 'claude-code' }}"
   # CLAUDE.md (based on ai_coding_agent)
