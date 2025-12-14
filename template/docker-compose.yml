@@ -22,6 +22,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: development
     container_name: {{ project_slug }}-backend
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-app}
@@ -42,13 +43,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
   # Next.js Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: development
     container_name: {{ project_slug }}-frontend
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
