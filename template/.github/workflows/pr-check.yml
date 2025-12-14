@@ -1,0 +1,73 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  pr-title:
+    name: PR Title Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title format
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^.+$
+          subjectPatternError: |
+            PRタイトルは以下の形式にしてください:
+            <type>: <description>
+            例: feat: ユーザー認証機能を追加
+
+  branch-check:
+    name: Branch Check
+    runs-on: ubuntu-latest
+    env:
+      BRANCH_NAME: {% raw %}${{ github.head_ref }}{% endraw %}
+    steps:
+      - name: Check branch naming
+        run: |
+          if [[ ! "$BRANCH_NAME" =~ ^(feature|fix|refactor|docs|test|chore)/.+ ]]; then
+            echo "::error::ブランチ名は feature/, fix/, refactor/, docs/, test/, chore/ で始める必要があります"
+            echo "現在のブランチ名: $BRANCH_NAME"
+            exit 1
+          fi
+
+  target-branch-check:
+    name: Target Branch Check
+    runs-on: ubuntu-latest
+    env:
+      BASE_BRANCH: {% raw %}${{ github.base_ref }}{% endraw %}
+      HEAD_BRANCH: {% raw %}${{ github.head_ref }}{% endraw %}
+    steps:
+      - name: Check target branch
+        run: |
+          # mainブランチへのPRはdevelopからのみ許可
+          if [[ "$BASE_BRANCH" == "main" && "$HEAD_BRANCH" != "develop" ]]; then
+            echo "::error::mainブランチへのPRはdevelopブランチからのみ許可されています"
+            exit 1
+          fi
+
+  label-check:
+    name: Auto Label
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}

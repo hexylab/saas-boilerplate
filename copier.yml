@@ -1,0 +1,149 @@
+# Copier configuration for SaaS Boilerplate
+# https://copier.readthedocs.io/
+
+_min_copier_version: "9.0.0"
+
+_subdirectory: template
+
+_templates_suffix: ""
+
+_jinja_extensions:
+  - jinja2_time.TimeExtension
+
+# ====================
+# Project Information
+# ====================
+
+project_name:
+  type: str
+  help: プロジェクト名（例: My SaaS App）
+  validator: "{% if not project_name %}プロジェクト名は必須です{% endif %}"
+
+project_slug:
+  type: str
+  help: プロジェクトスラッグ（ディレクトリ名、パッケージ名に使用）
+  default: "{{ project_name | lower | replace(' ', '-') | replace('_', '-') }}"
+
+project_description:
+  type: str
+  help: プロジェクトの説明
+  default: "AI駆動開発に最適化されたSaaSアプリケーション"
+
+author_name:
+  type: str
+  help: 作者名
+
+author_email:
+  type: str
+  help: 作者のメールアドレス
+  default: ""
+
+# ====================
+# AI Coding Agent Selection
+# ====================
+
+ai_coding_agent:
+  type: str
+  help: 使用するAI Codingエージェント
+  default: both
+  choices:
+    both: Claude Code + GitHub Copilot
+    claude-code: Claude Code のみ
+    github-copilot: GitHub Copilot のみ
+
+# ====================
+# Optional Features
+# ====================
+
+include_e2e_tests:
+  type: bool
+  default: false
+  help: Playwright E2Eテストを含めますか？
+
+include_advanced_auth:
+  type: bool
+  default: false
+  help: Cognito認証アダプター（本番用）を含めますか？
+
+include_storage_adapter:
+  type: bool
+  default: false
+  help: S3ストレージアダプターを含めますか？
+
+include_infrastructure:
+  type: bool
+  default: false
+  help: AWS CDKインフラを含めますか？
+
+include_extended_docs:
+  type: bool
+  default: false
+  help: 詳細ドキュメント構造を含めますか？
+
+include_pr_checks:
+  type: bool
+  default: false
+  help: PRチェックワークフローを含めますか？
+
+# ====================
+# AWS Configuration (conditional)
+# ====================
+
+aws_region:
+  type: str
+  help: AWSリージョン
+  default: ap-northeast-1
+  when: "{{ include_infrastructure or include_advanced_auth }}"
+  choices:
+    - ap-northeast-1
+    - ap-northeast-3
+    - us-east-1
+    - us-west-2
+    - eu-west-1
+
+# ====================
+# Exclude patterns based on selections
+# ====================
+
+_exclude:
+  # E2E tests
+  - "{{ 'frontend/e2e' if not include_e2e_tests }}"
+  - "{{ 'frontend/playwright.config.ts' if not include_e2e_tests }}"
+  # Advanced auth adapters
+  - "{{ 'backend/src/adapters/auth/cognito.py' if not include_advanced_auth }}"
+  - "{{ 'backend/src/adapters/auth/base.py' if not include_advanced_auth }}"
+  - "{{ 'backend/src/adapters/auth/factory.py' if not include_advanced_auth }}"
+  # Storage adapters
+  - "{{ 'backend/src/adapters/storage' if not include_storage_adapter }}"
+  - "{{ 'backend/storage' if not include_storage_adapter }}"
+  # Infrastructure
+  - "{{ 'infrastructure' if not include_infrastructure }}"
+  # Extended docs
+  - "{{ 'docs/frontend' if not include_extended_docs }}"
+  - "{{ 'docs/backend' if not include_extended_docs }}"
+  - "{{ 'docs/infrastructure' if not include_extended_docs }}"
+  - "{{ 'docs/operations' if not include_extended_docs }}"
+  # PR checks workflow
+  - "{{ '.github/workflows/pr-check.yml' if not include_pr_checks }}"
+  # Copilot instructions (based on ai_coding_agent)
+  - "{{ '.github/copilot-instructions.md' if ai_coding_agent == 'claude-code' }}"
+  # CLAUDE.md (based on ai_coding_agent)
+  - "{{ 'CLAUDE.md' if ai_coding_agent == 'github-copilot' }}"
+  - "{{ 'AGENTS.md' if ai_coding_agent == 'github-copilot' }}"
+
+# ====================
+# Tasks (post-generation hooks)
+# ====================
+
+_tasks:
+  - "echo ''"
+  - "echo '✅ プロジェクト {{ project_name }} を作成しました！'"
+  - "echo ''"
+  - "echo '📋 セットアップ手順:'"
+  - "echo '  1. cd {{ project_slug }}'"
+  - "echo '  2. make setup'"
+  - "echo '  3. make dev'"
+  - "echo '  4. http://localhost:3000 にアクセス'"
+  - "echo ''"
+  - "echo '🔐 テストユーザー: test@example.com / password'"
+  - "echo ''"

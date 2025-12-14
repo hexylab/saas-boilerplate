@@ -1,0 +1,101 @@
+# ====================
+# OS generated files
+# ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ====================
+# Editor directories and files
+# ====================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# ====================
+# Environment files
+# ====================
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ====================
+# Frontend (Next.js)
+# ====================
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.pnpm-store/
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+frontend/.turbo/
+
+# ====================
+# Backend (Python/FastAPI)
+# ====================
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.py[cod]
+backend/**/*.py[cod]
+backend/*$py.class
+backend/**/*$py.class
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/htmlcov/
+backend/.coverage
+backend/coverage.xml
+backend/*.egg-info/
+backend/dist/
+backend/build/
+backend/.eggs/
+backend/*.egg
+backend/.uv/
+backend/.venv/
+
+# ====================
+# Infrastructure (CDK)
+# ====================
+infrastructure/node_modules/
+infrastructure/cdk.out/
+infrastructure/*.js
+infrastructure/*.d.ts
+!infrastructure/jest.config.js
+
+# ====================
+# Docker
+# ====================
+docker-compose.override.yml
+
+# ====================
+# Logs
+# ====================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ====================
+# Local storage
+# ====================
+backend/storage/
+!backend/storage/.gitkeep
+
+# ====================
+# Temporary files
+# ====================
+tmp/
+temp/
+*.tmp
+*.temp
