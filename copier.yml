@@ -42,11 +42,11 @@ author_email:
 ai_coding_agent:
   type: str
   help: 使用するAI Codingエージェント
-  default: both
+  default: "both"
   choices:
-    both: Claude Code + GitHub Copilot
-    claude-code: Claude Code のみ
-    github-copilot: GitHub Copilot のみ
+    "both": "Claude Code + GitHub Copilot"
+    "claude-code": "Claude Code のみ"
+    "github-copilot": "GitHub Copilot のみ"
 
 # ====================
 # Optional Features
