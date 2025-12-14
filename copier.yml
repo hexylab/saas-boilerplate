@@ -7,9 +7,6 @@ _subdirectory: template
 
 _templates_suffix: ""
 
-_jinja_extensions:
-  - jinja2_time.TimeExtension
-
 # ====================
 # Project Information
 # ====================
