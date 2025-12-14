@@ -65,14 +65,15 @@ async def login(
 
     if not user:
         # Create user in database if not exists
-        user = User(
-            email=auth_user.email,
-            name=auth_user.name,
-            external_id=auth_user.external_id,
-            is_active=True,
-        )
-        db.add(user)
-        await db.flush()
+        async with db.begin():
+            user = User(
+                email=auth_user.email,
+                name=auth_user.name,
+                external_id=auth_user.external_id,
+                is_active=True,
+            )
+            db.add(user)
+            await db.flush()
         logger.info("Created new user from auth", user_id=user.id, email=user.email)
 
     if not user.is_active:
@@ -132,15 +133,16 @@ async def register(
         )
 
         # Create user in database
-        user = User(
-            email=auth_user.email,
-            name=auth_user.name,
-            hashed_password=get_password_hash(request.password),
-            external_id=auth_user.external_id,
-            is_active=True,
-        )
-        db.add(user)
-        await db.flush()
+        async with db.begin():
+            user = User(
+                email=auth_user.email,
+                name=auth_user.name,
+                hashed_password=get_password_hash(request.password),
+                external_id=auth_user.external_id,
+                is_active=True,
+            )
+            db.add(user)
+            await db.flush()
 
         logger.info("User registered", user_id=user.id, email=user.email)
 

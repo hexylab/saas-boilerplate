@@ -46,12 +46,8 @@ async def update_current_user(
     Returns:
         Updated user information.
     """
-    # Update allowed fields
-    if update_data.name is not None:
-        current_user.name = update_data.name
-
+    # Check if email is already taken (before transaction)
     if update_data.email is not None:
-        # Check if email is already taken
         stmt = select(User).where(
             User.email == update_data.email,
             User.id != current_user.id,
@@ -62,12 +58,20 @@ async def update_current_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already in use",
             )
-        current_user.email = update_data.email
 
-    if update_data.password is not None:
-        current_user.hashed_password = get_password_hash(update_data.password)
+    # Update allowed fields within transaction
+    async with db.begin():
+        if update_data.name is not None:
+            current_user.name = update_data.name
 
-    await db.flush()
+        if update_data.email is not None:
+            current_user.email = update_data.email
+
+        if update_data.password is not None:
+            current_user.hashed_password = get_password_hash(update_data.password)
+
+        await db.flush()
+
     logger.info("User updated", user_id=current_user.id)
 
     return current_user
@@ -160,5 +164,7 @@ async def delete_user(
             detail="User not found",
         )
 
-    await db.delete(user)
+    async with db.begin():
+        await db.delete(user)
+
     logger.info("User deleted", user_id=user_id, deleted_by=current_user.id)

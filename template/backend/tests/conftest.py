@@ -64,7 +64,11 @@ async def test_engine(test_settings: Settings):
 
 @pytest.fixture
 async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
-    """Create a test database session."""
+    """Create a test database session with proper isolation.
+
+    Uses nested transactions (savepoints) to ensure each test
+    runs in isolation and changes are rolled back after each test.
+    """
     async_session_maker = async_sessionmaker(
         test_engine,
         class_=AsyncSession,
@@ -72,8 +76,16 @@ async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
     )
 
     async with async_session_maker() as session:
-        yield session
-        await session.rollback()
+        # Start a transaction for the test
+        async with session.begin():
+            # Create a nested transaction (savepoint)
+            nested = await session.begin_nested()
+
+            yield session
+
+            # Rollback the nested transaction to clean up test data
+            if nested.is_active:
+                await nested.rollback()
 
 
 @pytest.fixture
@@ -93,7 +105,7 @@ async def test_user(db_session: AsyncSession) -> User:
         is_superuser=False,
     )
     db_session.add(user)
-    await db_session.commit()
+    await db_session.flush()
     await db_session.refresh(user)
     return user
 
@@ -109,7 +121,7 @@ async def superuser(db_session: AsyncSession) -> User:
         is_superuser=True,
     )
     db_session.add(user)
-    await db_session.commit()
+    await db_session.flush()
     await db_session.refresh(user)
     return user
 

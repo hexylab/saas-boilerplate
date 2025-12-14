@@ -160,6 +160,9 @@ jobs:
       AUTH_PROVIDER: mock
       STORAGE_PROVIDER: local
       SECRET_KEY: test-secret-key
+      CORS_ORIGINS: http://localhost:3000
+      LOG_HANDLER: console
+      LOG_LEVEL: WARNING
     steps:
       - uses: actions/checkout@v4
 

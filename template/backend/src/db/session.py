@@ -38,21 +38,34 @@ async_session_maker = async_sessionmaker(
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Get a database session.
 
+    This function provides a session without auto-commit.
+    For write operations, use `async with db.begin():` to manage transactions.
+
     Yields:
         An async database session.
 
-    Example:
+    Example (read):
         ```python
         @router.get("/users")
         async def get_users(db: AsyncSession = Depends(get_db)):
             result = await db.execute(select(User))
             return result.scalars().all()
         ```
+
+    Example (write):
+        ```python
+        @router.post("/users")
+        async def create_user(payload: UserCreate, db: AsyncSession = Depends(get_db)):
+            async with db.begin():
+                user = User(**payload.model_dump())
+                db.add(user)
+                await db.flush()
+            return {"id": user.id}
+        ```
     """
     async with async_session_maker() as session:
         try:
             yield session
-            await session.commit()
         except Exception:
             await session.rollback()
             raise
