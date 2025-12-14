@@ -44,9 +44,9 @@ ai_coding_agent:
   help: 使用するAI Codingエージェント
   default: "both"
   choices:
-    "both": "Claude Code + GitHub Copilot"
-    "claude-code": "Claude Code のみ"
-    "github-copilot": "GitHub Copilot のみ"
+    - both
+    - claude-code
+    - github-copilot
 
 # ====================
 # Optional Features
