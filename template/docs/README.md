@@ -5,13 +5,14 @@
 このディレクトリにはプロジェクトのドキュメントを配置します。
 
 ## ドキュメント構成
-
 {% if include_extended_docs %}
 - [フロントエンド](./frontend/README.md) - Next.js アプリケーション
 - [バックエンド](./backend/README.md) - FastAPI アプリケーション
+{%- if include_infrastructure %}
 - [インフラ](./infrastructure/README.md) - AWS CDK
+{%- endif %}
 - [運用](./operations/README.md) - 運用関連ドキュメント
-{% else %}
+{%- else %}
 ドキュメントを追加する場合は、以下のような構成を推奨します:
 
 ```
@@ -21,7 +22,7 @@ docs/
 ├── api.md             # API仕様
 └── deployment.md      # デプロイ手順
 ```
-{% endif %}
+{%- endif %}
 
 ## クイックリンク
 

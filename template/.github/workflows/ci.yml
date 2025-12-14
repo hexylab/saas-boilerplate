@@ -179,7 +179,7 @@ jobs:
 
       - name: Run tests
         run: uv run pytest --cov=src --cov-report=xml
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 
   # ====================
   # E2E Tests
@@ -273,4 +273,4 @@ jobs:
           name: playwright-report
           path: frontend/playwright-report/
           retention-days: 7
-{% endif %}
+{%- endif %}

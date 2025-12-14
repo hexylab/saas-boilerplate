@@ -1,10 +1,10 @@
 # {{ project_name }}
 
-AI駆動開発に最適化されたSaaSボイラープレート
+{{ project_description }}
 
 ## 概要
 
-このプロジェクトは、Claude Code / GitHub Copilot を活用したAI駆動開発に最適化されたSaaSアプリケーションのボイラープレートです。
+このプロジェクトは、Claude Code / GitHub Copilot を活用したAI駆動開発に最適化されたSaaSアプリケーションです。
 
 ## 技術スタック
 
@@ -15,14 +15,14 @@ AI駆動開発に最適化されたSaaSボイラープレート
 | データベース | PostgreSQL |
 | ORM | SQLAlchemy |
 | マイグレーション | Alembic |
-{% if include_advanced_auth %}
+{%- if include_advanced_auth %}
 | 認証 | AWS Cognito / モックadapter |
-{% else %}
+{%- else %}
 | 認証 | モックadapter |
-{% endif %}
-{% if include_infrastructure %}
+{%- endif %}
+{%- if include_infrastructure %}
 | IaC | AWS CDK |
-{% endif %}
+{%- endif %}
 
 ## クイックスタート
 
@@ -95,9 +95,9 @@ uv run uvicorn src.main:app --reload
 .
 ├── frontend/          # Next.js アプリケーション
 ├── backend/           # FastAPI アプリケーション
-{% if include_infrastructure %}
+{%- if include_infrastructure %}
 ├── infrastructure/    # AWS CDK
-{% endif %}
+{%- endif %}
 ├── docs/              # ドキュメント
 ├── plans/             # 計画書
 └── .github/           # GitHub設定（CI/CD, テンプレート）
@@ -151,9 +151,9 @@ make backend-migrate # マイグレーション実行
 # フロントエンド
 make frontend-test  # フロントエンドテスト
 make frontend-lint  # フロントエンドリンター
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 make frontend-e2e   # E2Eテスト
-{% endif %}
+{%- endif %}
 ```
 
 ## テスト
@@ -163,9 +163,9 @@ make frontend-e2e   # E2Eテスト
 ```bash
 cd frontend
 pnpm test          # ユニットテスト
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 pnpm e2e           # E2Eテスト
-{% endif %}
+{%- endif %}
 ```
 
 ### バックエンド
@@ -176,17 +176,16 @@ uv run pytest
 ```
 
 ## ドキュメント
-
 {% if include_extended_docs %}
 - [フロントエンド](./docs/frontend/README.md)
 - [バックエンド](./docs/backend/README.md)
-{% if include_infrastructure %}
+{%- if include_infrastructure %}
 - [インフラ](./docs/infrastructure/README.md)
-{% endif %}
+{%- endif %}
 - [運用](./docs/operations/README.md)
-{% else %}
+{%- else %}
 ドキュメントは `docs/` ディレクトリを参照してください。
-{% endif %}
+{%- endif %}
 
 ## ライセンス
 

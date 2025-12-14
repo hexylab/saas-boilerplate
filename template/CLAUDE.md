@@ -12,14 +12,14 @@
 - **バックエンド**: FastAPI (Python 3.12+)
 - **データベース**: PostgreSQL 16
 - **ORM**: SQLAlchemy 2.0 + Alembic
-{% if include_advanced_auth %}
+{%- if include_advanced_auth %}
 - **認証**: AWS Cognito / モックadapter
-{% else %}
+{%- else %}
 - **認証**: モックadapter（ローカル開発用）
-{% endif %}
-{% if include_infrastructure %}
+{%- endif %}
+{%- if include_infrastructure %}
 - **IaC**: AWS CDK
-{% endif %}
+{%- endif %}
 
 ### パッケージマネージャー
 
@@ -39,13 +39,13 @@
 │   │   ├── stores/    # Zustand ストア
 │   │   └── types/     # TypeScript 型定義
 │   └── tests/         # Jest ユニットテスト
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 │   └── e2e/           # Playwright E2Eテスト
-{% endif %}
+{%- endif %}
 │
 ├── backend/           # FastAPI アプリケーション
 │   ├── src/
-│   │   ├── adapters/  # 外部サービス抽象化（認証{% if include_storage_adapter %}、ストレージ{% endif %}）
+│   │   ├── adapters/  # 外部サービス抽象化（認証{%- if include_storage_adapter %}、ストレージ{%- endif %}）
 │   │   ├── api/       # APIエンドポイント
 │   │   ├── core/      # 共通機能（ログ、セキュリティ）
 │   │   ├── db/        # データベース設定
@@ -53,9 +53,9 @@
 │   │   └── schemas/   # Pydantic スキーマ
 │   └── tests/         # pytest テスト
 │
-{% if include_infrastructure %}
+{%- if include_infrastructure %}
 ├── infrastructure/    # AWS CDK スタック
-{% endif %}
+{%- endif %}
 ├── docs/              # ドキュメント
 └── plans/             # 計画書
 ```
@@ -75,9 +75,9 @@ cd frontend
 pnpm dev          # 開発サーバー
 pnpm build        # ビルド
 pnpm test         # ユニットテスト
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 pnpm e2e          # E2Eテスト
-{% endif %}
+{%- endif %}
 pnpm lint         # ESLint
 pnpm format       # Prettier
 ```
@@ -133,10 +133,10 @@ uv run alembic revision --autogenerate -m "message"  # マイグレーション�
 ## テスト方針
 
 - ユニットテスト: ビジネスロジックを中心に
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 - E2Eテスト: 主要なユーザーフローをカバー
-{% endif %}
-- モック: 外部サービス（認証{% if include_storage_adapter %}、ストレージ{% endif %}）は adapters のモック実装を使用
+{%- endif %}
+- モック: 外部サービス（認証{%- if include_storage_adapter %}、ストレージ{%- endif %}）は adapters のモック実装を使用
 
 ## 計画書の作成
 

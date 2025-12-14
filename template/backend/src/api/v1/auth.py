@@ -5,12 +5,13 @@ This module provides authentication-related API endpoints.
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
+{%- if include_advanced_auth %}
 
-{% if include_advanced_auth %}
 from src.adapters.auth.base import AuthenticationError, UserExistsError
-{% else %}
+{%- else %}
+
 from src.adapters.auth.mock import AuthenticationError, UserExistsError
-{% endif %}
+{%- endif %}
 from src.adapters.auth.mock import MockAuthProvider
 from src.api.deps import Auth, DBSession
 from src.core.logging import logger

@@ -15,11 +15,11 @@
 1. **Issue作成**: GitHub Issueで作業内容を定義
 2. **計画策定**: `plans/` に計画書を作成
 3. **実装**: コードを書く
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 4. **テスト**: ユニットテスト・E2Eテストを実行
-{% else %}
+{%- else %}
 4. **テスト**: ユニットテストを実行
-{% endif %}
+{%- endif %}
 5. **ドキュメント**: 必要に応じてdocs/を更新
 6. **PR作成**: developブランチへPRを作成
 
@@ -50,11 +50,11 @@ refactor/*  ← リファクタリング
 | Pydanticスキーマ | `backend/src/schemas/` |
 | 外部サービス連携 | `backend/src/adapters/` |
 | 計画書 | `plans/` |
-{% if include_extended_docs %}
-| ドキュメント | `docs/{frontend,backend{% if include_infrastructure %},infrastructure{% endif %},operations}/` |
-{% else %}
+{%- if include_extended_docs %}
+| ドキュメント | `docs/{frontend,backend{%- if include_infrastructure %},infrastructure{%- endif %},operations}/` |
+{%- else %}
 | ドキュメント | `docs/` |
-{% endif %}
+{%- endif %}
 
 ## コード生成のガイドライン
 

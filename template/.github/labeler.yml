@@ -10,13 +10,13 @@ frontend:
 backend:
   - changed-files:
       - any-glob-to-any-file: 'backend/**/*'
-{% if include_infrastructure %}
+{%- if include_infrastructure %}
 
 # Infrastructure changes
 infrastructure:
   - changed-files:
       - any-glob-to-any-file: 'infrastructure/**/*'
-{% endif %}
+{%- endif %}
 
 # Documentation changes
 documentation:
@@ -35,7 +35,7 @@ tests:
   - changed-files:
       - any-glob-to-any-file:
           - 'frontend/tests/**/*'
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
           - 'frontend/e2e/**/*'
-{% endif %}
+{%- endif %}
           - 'backend/tests/**/*'

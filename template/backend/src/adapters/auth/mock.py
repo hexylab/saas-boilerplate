@@ -6,14 +6,14 @@ dependencies.
 """
 
 from dataclasses import dataclass
-{% if include_advanced_auth %}
+{%- if include_advanced_auth %}
 from src.adapters.auth.base import (
     AuthenticationError,
     AuthProvider,
     AuthUser,
     UserExistsError,
 )
-{% else %}
+{%- else %}
 
 
 class AuthenticationError(Exception):
@@ -40,7 +40,7 @@ class AuthUser:
     def external_id(self) -> str:
         """Return the external ID (same as id for mock)."""
         return self.id
-{% endif %}
+{%- endif %}
 
 from src.core.security import (
     create_access_token,
@@ -50,7 +50,7 @@ from src.core.security import (
 )
 
 
-class MockAuthProvider{% if include_advanced_auth %}(AuthProvider){% endif %}:
+class MockAuthProvider{%- if include_advanced_auth %}(AuthProvider){%- endif %}:
     """Mock authentication provider for development.
 
     Stores users in memory with password hashing.

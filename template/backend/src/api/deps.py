@@ -11,11 +11,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.adapters.auth import AuthProvider, get_auth_provider
-{% if include_advanced_auth %}
+{%- if include_advanced_auth %}
 from src.adapters.auth.base import AuthUser
-{% else %}
+{%- else %}
 from src.adapters.auth.mock import AuthUser
-{% endif %}
+{%- endif %}
 from src.db.session import get_db
 from src.models.user import User
 

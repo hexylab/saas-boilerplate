@@ -27,9 +27,9 @@ help:
 	@echo "  frontend-test   - Run frontend tests"
 	@echo "  frontend-lint   - Run frontend linters"
 	@echo "  frontend-format - Format frontend code"
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 	@echo "  frontend-e2e    - Run E2E tests"
-{% endif %}
+{%- endif %}
 
 # ===================
 # Project-wide targets
@@ -107,11 +107,11 @@ frontend-lint:
 
 frontend-format:
 	cd frontend && pnpm format
-{% if include_e2e_tests %}
+{%- if include_e2e_tests %}
 
 frontend-e2e:
 	cd frontend && pnpm e2e
-{% endif %}
+{%- endif %}
 
 # ===================
 # Database targets
