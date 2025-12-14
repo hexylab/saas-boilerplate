@@ -104,7 +104,7 @@ aws_region:
 
 _exclude:
   # E2E tests
-  - "{{ 'frontend/e2e' if not include_e2e_tests }}"
+  - "{{ 'frontend/tests/e2e' if not include_e2e_tests }}"
   - "{{ 'frontend/playwright.config.ts' if not include_e2e_tests }}"
   # Advanced auth adapters
   - "{{ 'backend/src/adapters/auth/cognito.py' if not include_advanced_auth }}"

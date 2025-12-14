@@ -35,7 +35,4 @@ tests:
   - changed-files:
       - any-glob-to-any-file:
           - 'frontend/tests/**/*'
-{%- if include_e2e_tests %}
-          - 'frontend/e2e/**/*'
-{%- endif %}
           - 'backend/tests/**/*'

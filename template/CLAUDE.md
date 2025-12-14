@@ -38,9 +38,10 @@
 │   │   ├── hooks/     # カスタムフック
 │   │   ├── stores/    # Zustand ストア
 │   │   └── types/     # TypeScript 型定義
-│   └── tests/         # Jest ユニットテスト
+│   └── tests/         # テスト
+│       ├── components/ # Jest ユニットテスト
 {%- if include_e2e_tests %}
-│   └── e2e/           # Playwright E2Eテスト
+│       └── e2e/        # Playwright E2Eテスト
 {%- endif %}
 │
 ├── backend/           # FastAPI アプリケーション
