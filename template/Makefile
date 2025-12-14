@@ -7,7 +7,7 @@
 help:
 	@echo "Available targets:"
 	@echo "  setup     - Initial project setup (install dependencies, generate lock files)"
-	@echo "  dev       - Start development environment"
+	@echo "  dev       - Start development environment (includes migrations)"
 	@echo "  down      - Stop development environment"
 	@echo "  logs      - Show logs from all services"
 	@echo "  test      - Run all tests"

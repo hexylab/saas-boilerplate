@@ -66,7 +66,12 @@
 ### 全サービス起動
 
 ```bash
+# 推奨: マイグレーション含む
+make dev
+
+# または docker compose のみ（マイグレーションは別途実行）
 docker compose up -d
+docker compose exec backend uv run alembic upgrade head
 ```
 
 ### フロントエンド

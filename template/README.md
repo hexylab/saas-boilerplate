@@ -48,15 +48,15 @@ cd frontend && pnpm install && cd ..
 ### 開発環境の起動
 
 ```bash
-# 全サービスを起動
+# 全サービスを起動（マイグレーション含む）
 make dev
-
-# または docker compose を直接使用
-docker compose up -d
 
 # ログを確認
 docker compose logs -f
 ```
+
+> **Note**: `make dev` はコンテナ起動後に自動でデータベースマイグレーションを実行します。
+> `docker compose up -d` を直接使用する場合は、別途 `make backend-migrate` の実行が必要です。
 
 アプリケーションにアクセス:
 - フロントエンド: http://localhost:3000
@@ -136,7 +136,7 @@ feature/*   ← 機能開発ブランチ
 ```bash
 make help           # 利用可能なコマンド一覧
 make setup          # 初期セットアップ
-make dev            # 開発環境起動
+make dev            # 開発環境起動（マイグレーション含む）
 make down           # 開発環境停止
 make test           # 全テスト実行
 make lint           # リンター実行
