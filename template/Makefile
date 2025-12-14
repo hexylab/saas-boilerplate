@@ -41,6 +41,10 @@ setup: backend-setup frontend-setup
 
 dev:
 	docker compose up -d
+	@echo "Waiting for database to be ready..."
+	@sleep 3
+	docker compose exec backend uv run alembic upgrade head
+	@echo ""
 	@echo "Development environment started!"
 	@echo "  Frontend: http://localhost:3000"
 	@echo "  Backend:  http://localhost:8000"
