@@ -8,6 +8,103 @@
 - **説明**: {{ project_description }}
 - **作者**: {{ author_name }}
 
+## 技術スタック
+
+- **フロントエンド**: Next.js 14+ (App Router, TypeScript)
+- **バックエンド**: FastAPI (Python 3.12+)
+- **データベース**: PostgreSQL 16
+- **ORM**: SQLAlchemy 2.0 + Alembic
+{%- if include_advanced_auth %}
+- **認証**: AWS Cognito / モックadapter
+{%- else %}
+- **認証**: モックadapter（ローカル開発用）
+{%- endif %}
+{%- if include_infrastructure %}
+- **IaC**: AWS CDK
+{%- endif %}
+- **パッケージ管理**: pnpm (frontend), uv (backend)
+
+## ディレクトリ構造
+
+```
+.
+├── frontend/          # Next.js アプリケーション
+│   ├── src/
+│   │   ├── app/       # App Router ページ
+│   │   ├── components/ # React コンポーネント
+│   │   ├── lib/       # ユーティリティ、APIクライアント
+│   │   ├── hooks/     # カスタムフック
+│   │   ├── stores/    # Zustand ストア
+│   │   └── types/     # TypeScript 型定義
+│   └── tests/         # テスト
+│       ├── components/ # Jest ユニットテスト
+{%- if include_e2e_tests %}
+│       └── e2e/        # Playwright E2Eテスト
+{%- endif %}
+│
+├── backend/           # FastAPI アプリケーション
+│   ├── src/
+│   │   ├── adapters/  # 外部サービス抽象化（認証{%- if include_storage_adapter %}、ストレージ{%- endif %}）
+│   │   ├── api/       # APIエンドポイント
+│   │   ├── core/      # 共通機能（ログ、セキュリティ）
+│   │   ├── db/        # データベース設定
+│   │   ├── models/    # SQLAlchemy モデル
+│   │   └── schemas/   # Pydantic スキーマ
+│   └── tests/         # pytest テスト
+│
+{%- if include_infrastructure %}
+├── infrastructure/    # AWS CDK スタック
+{%- endif %}
+├── docs/              # ドキュメント
+└── plans/             # 計画書
+```
+
+## 開発コマンド
+
+### 全サービス起動
+
+```bash
+# 推奨: マイグレーション含む
+make dev
+
+# または docker compose のみ（マイグレーションは別途実行）
+docker compose up -d
+docker compose exec backend uv run alembic upgrade head
+```
+
+### フロントエンド
+
+```bash
+cd frontend
+pnpm dev          # 開発サーバー
+pnpm build        # ビルド
+pnpm test         # ユニットテスト
+{%- if include_e2e_tests %}
+pnpm e2e          # E2Eテスト
+{%- endif %}
+pnpm lint         # ESLint
+pnpm format       # Prettier
+```
+
+### バックエンド
+
+```bash
+cd backend
+uv run uvicorn src.main:app --reload  # 開発サーバー
+uv run pytest                          # テスト
+uv run ruff check .                    # リント
+uv run ruff format .                   # フォーマット
+uv run mypy src                        # 型チェック
+```
+
+### データベースマイグレーション
+
+```bash
+cd backend
+uv run alembic upgrade head            # マイグレーション適用
+uv run alembic revision --autogenerate -m "message"  # マイグレーション作成
+```
+
 ## 開発ワークフロー
 
 ### Issue駆動開発
@@ -168,3 +265,26 @@ async def test_get_resource(client: AsyncClient):
 - `console.log` / `print` のコミット（デバッグ用途）
 - テストなしでのPRマージ
 - main/developブランチへの直接プッシュ
+
+## 計画書の作成
+
+機能追加・バグFIX・リファクタリングを行う際は、`plans/` ディレクトリに計画書を作成してください。
+
+```markdown
+# 計画書テンプレート
+
+## 概要
+何を実現するか
+
+## 背景
+なぜ必要か
+
+## 設計
+どのように実現するか
+
+## 影響範囲
+どのファイルを変更するか
+
+## テスト計画
+どのようにテストするか
+```
