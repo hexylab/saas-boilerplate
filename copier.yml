@@ -16,7 +16,7 @@ _jinja_extensions:
 
 project_name:
   type: str
-  help: プロジェクト名（例: My SaaS App）
+  help: "プロジェクト名（例: My SaaS App）"
   validator: "{% if not project_name %}プロジェクト名は必須です{% endif %}"
 
 project_slug:
