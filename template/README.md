@@ -15,12 +15,12 @@
 | データベース | PostgreSQL |
 | ORM | SQLAlchemy |
 | マイグレーション | Alembic |
-{%- if include_advanced_auth %}
+{%- if _enable_aws_auth %}
 | 認証 | AWS Cognito / モックadapter |
 {%- else %}
 | 認証 | モックadapter |
 {%- endif %}
-{%- if include_infrastructure %}
+{%- if _enable_aws_infra %}
 | IaC | AWS CDK |
 {%- endif %}
 
@@ -95,7 +95,7 @@ uv run uvicorn src.main:app --reload
 .
 ├── frontend/          # Next.js アプリケーション
 ├── backend/           # FastAPI アプリケーション
-{%- if include_infrastructure %}
+{%- if _enable_aws_infra %}
 ├── infrastructure/    # AWS CDK
 {%- endif %}
 ├── docs/              # ドキュメント
@@ -151,7 +151,7 @@ make backend-migrate # マイグレーション実行
 # フロントエンド
 make frontend-test  # フロントエンドテスト
 make frontend-lint  # フロントエンドリンター
-{%- if include_e2e_tests %}
+{%- if _enable_e2e %}
 make frontend-e2e   # E2Eテスト
 {%- endif %}
 ```
@@ -163,7 +163,7 @@ make frontend-e2e   # E2Eテスト
 ```bash
 cd frontend
 pnpm test          # ユニットテスト
-{%- if include_e2e_tests %}
+{%- if _enable_e2e %}
 pnpm e2e           # E2Eテスト
 {%- endif %}
 ```
@@ -176,10 +176,10 @@ uv run pytest
 ```
 
 ## ドキュメント
-{% if include_extended_docs %}
+{% if _enable_extended_docs %}
 - [フロントエンド](./docs/frontend/README.md)
 - [バックエンド](./docs/backend/README.md)
-{%- if include_infrastructure %}
+{%- if _enable_aws_infra %}
 - [インフラ](./docs/infrastructure/README.md)
 {%- endif %}
 - [運用](./docs/operations/README.md)

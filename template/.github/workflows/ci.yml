@@ -182,7 +182,7 @@ jobs:
 
       - name: Run tests
         run: uv run pytest --cov=src --cov-report=xml
-{%- if include_e2e_tests %}
+{%- if _enable_e2e %}
 
   # ====================
   # E2E Tests

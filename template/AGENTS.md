@@ -6,7 +6,6 @@
 
 - **プロジェクト名**: {{ project_name }}
 - **説明**: {{ project_description }}
-- **作者**: {{ author_name }}
 
 ## 技術スタック
 
@@ -14,12 +13,12 @@
 - **バックエンド**: FastAPI (Python 3.12+)
 - **データベース**: PostgreSQL 16
 - **ORM**: SQLAlchemy 2.0 + Alembic
-{%- if include_advanced_auth %}
+{%- if _enable_aws_auth %}
 - **認証**: AWS Cognito / モックadapter
 {%- else %}
 - **認証**: モックadapter（ローカル開発用）
 {%- endif %}
-{%- if include_infrastructure %}
+{%- if _enable_aws_infra %}
 - **IaC**: AWS CDK
 {%- endif %}
 - **パッケージ管理**: pnpm (frontend), uv (backend)
@@ -38,13 +37,13 @@
 │   │   └── types/     # TypeScript 型定義
 │   └── tests/         # テスト
 │       ├── components/ # Jest ユニットテスト
-{%- if include_e2e_tests %}
+{%- if _enable_e2e %}
 │       └── e2e/        # Playwright E2Eテスト
 {%- endif %}
 │
 ├── backend/           # FastAPI アプリケーション
 │   ├── src/
-│   │   ├── adapters/  # 外部サービス抽象化（認証{%- if include_storage_adapter %}、ストレージ{%- endif %}）
+│   │   ├── adapters/  # 外部サービス抽象化（認証{%- if _enable_aws_storage %}、ストレージ{%- endif %}）
 │   │   ├── api/       # APIエンドポイント
 │   │   ├── core/      # 共通機能（ログ、セキュリティ）
 │   │   ├── db/        # データベース設定
@@ -52,7 +51,7 @@
 │   │   └── schemas/   # Pydantic スキーマ
 │   └── tests/         # pytest テスト
 │
-{%- if include_infrastructure %}
+{%- if _enable_aws_infra %}
 ├── infrastructure/    # AWS CDK スタック
 {%- endif %}
 ├── docs/              # ドキュメント
@@ -79,7 +78,7 @@ cd frontend
 pnpm dev          # 開発サーバー
 pnpm build        # ビルド
 pnpm test         # ユニットテスト
-{%- if include_e2e_tests %}
+{%- if _enable_e2e %}
 pnpm e2e          # E2Eテスト
 {%- endif %}
 pnpm lint         # ESLint
@@ -112,7 +111,7 @@ uv run alembic revision --autogenerate -m "message"  # マイグレーション�
 1. **Issue作成**: GitHub Issueで作業内容を定義
 2. **計画策定**: `plans/` に計画書を作成
 3. **実装**: コードを書く
-{%- if include_e2e_tests %}
+{%- if _enable_e2e %}
 4. **テスト**: ユニットテスト・E2Eテストを実行
 {%- else %}
 4. **テスト**: ユニットテストを実行
@@ -147,8 +146,8 @@ refactor/*  ← リファクタリング
 | Pydanticスキーマ | `backend/src/schemas/` |
 | 外部サービス連携 | `backend/src/adapters/` |
 | 計画書 | `plans/` |
-{%- if include_extended_docs %}
-| ドキュメント | `docs/{frontend,backend{%- if include_infrastructure %},infrastructure{%- endif %},operations}/` |
+{%- if _enable_extended_docs %}
+| ドキュメント | `docs/{frontend,backend{%- if _enable_aws_infra %},infrastructure{%- endif %},operations}/` |
 {%- else %}
 | ドキュメント | `docs/` |
 {%- endif %}

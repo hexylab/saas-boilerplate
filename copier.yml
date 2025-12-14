@@ -26,15 +26,6 @@ project_description:
   help: プロジェクトの説明
   default: "AI駆動開発に最適化されたSaaSアプリケーション"
 
-author_name:
-  type: str
-  help: 作者名
-
-author_email:
-  type: str
-  help: 作者のメールアドレス
-  default: ""
-
 # ====================
 # AI Coding Agent Selection
 # ====================
@@ -49,38 +40,60 @@ ai_coding_agent:
     - github-copilot
 
 # ====================
-# Optional Features
+# Preset Selection
 # ====================
 
-include_e2e_tests:
-  type: bool
-  default: false
-  help: Playwright E2Eテストを含めますか？
+preset:
+  type: str
+  help: |
+    プリセットを選択してください:
+    - minimal: 最小構成（学習・PoC向け）
+    - standard: チーム開発向け（E2E + PRチェック + セキュリティ + ドキュメント）
+    - aws: AWS本番環境向け（Cognito + S3 + CDK + 全機能）
+  default: "standard"
+  choices:
+    - minimal
+    - standard
+    - aws
 
-include_advanced_auth:
-  type: bool
-  default: false
-  help: Cognito認証アダプター（本番用）を含めますか？
+# ====================
+# Computed Internal Flags
+# ====================
 
-include_storage_adapter:
+_enable_e2e:
   type: bool
-  default: false
-  help: S3ストレージアダプターを含めますか？
+  default: "{{ preset in ['standard', 'aws'] }}"
+  when: false
 
-include_infrastructure:
+_enable_aws_auth:
   type: bool
-  default: false
-  help: AWS CDKインフラを含めますか？
+  default: "{{ preset == 'aws' }}"
+  when: false
 
-include_extended_docs:
+_enable_aws_storage:
   type: bool
-  default: false
-  help: 詳細ドキュメント構造を含めますか？
+  default: "{{ preset == 'aws' }}"
+  when: false
 
-include_pr_checks:
+_enable_aws_infra:
   type: bool
-  default: false
-  help: PRチェックワークフローを含めますか？
+  default: "{{ preset == 'aws' }}"
+  when: false
+
+_enable_extended_docs:
+  type: bool
+  default: "{{ preset in ['standard', 'aws'] }}"
+  when: false
+
+_enable_pr_checks:
+  type: bool
+  default: "{{ preset in ['standard', 'aws'] }}"
+  when: false
+
+_enable_security:
+  type: bool
+  default: "{{ preset in ['standard', 'aws'] }}"
+  when: false
 
 # ====================
 # AWS Configuration (conditional)
@@ -90,7 +103,7 @@ aws_region:
   type: str
   help: AWSリージョン
   default: ap-northeast-1
-  when: "{{ include_infrastructure or include_advanced_auth }}"
+  when: "{{ preset == 'aws' }}"
   choices:
     - ap-northeast-1
     - ap-northeast-3
@@ -104,28 +117,27 @@ aws_region:
 
 _exclude:
   # E2E tests
-  - "{{ 'frontend/tests/e2e' if not include_e2e_tests }}"
-  - "{{ 'frontend/playwright.config.ts' if not include_e2e_tests }}"
-  # Advanced auth adapters
-  - "{{ 'backend/src/adapters/auth/cognito.py' if not include_advanced_auth }}"
-  - "{{ 'backend/src/adapters/auth/base.py' if not include_advanced_auth }}"
-  - "{{ 'backend/src/adapters/auth/factory.py' if not include_advanced_auth }}"
-  # Storage adapters
-  - "{{ 'backend/src/adapters/storage' if not include_storage_adapter }}"
-  - "{{ 'backend/storage' if not include_storage_adapter }}"
+  - "{{ 'frontend/tests/e2e' if not _enable_e2e }}"
+  - "{{ 'frontend/playwright.config.ts' if not _enable_e2e }}"
+  # AWS auth (Cognito implementation only - base.py and factory.py are always included)
+  - "{{ 'backend/src/adapters/auth/cognito.py' if not _enable_aws_auth }}"
+  # AWS storage (S3 implementation only - base.py, local.py, factory.py are always included)
+  - "{{ 'backend/src/adapters/storage/s3.py' if not _enable_aws_storage }}"
   # Infrastructure
-  - "{{ 'infrastructure' if not include_infrastructure }}"
+  - "{{ 'infrastructure' if not _enable_aws_infra }}"
   # Extended docs
-  - "{{ 'docs/frontend' if not include_extended_docs }}"
-  - "{{ 'docs/backend' if not include_extended_docs }}"
-  - "{{ 'docs/infrastructure' if not include_extended_docs or not include_infrastructure }}"
-  - "{{ 'docs/operations' if not include_extended_docs }}"
+  - "{{ 'docs/frontend' if not _enable_extended_docs }}"
+  - "{{ 'docs/backend' if not _enable_extended_docs }}"
+  - "{{ 'docs/infrastructure' if not _enable_extended_docs or not _enable_aws_infra }}"
+  - "{{ 'docs/operations' if not _enable_extended_docs }}"
   # PR checks workflow
-  - "{{ '.github/workflows/pr-check.yml' if not include_pr_checks }}"
-  - "{{ '.github/labeler.yml' if not include_pr_checks }}"
-  # Copilot instructions (based on ai_coding_agent)
+  - "{{ '.github/workflows/pr-check.yml' if not _enable_pr_checks }}"
+  - "{{ '.github/labeler.yml' if not _enable_pr_checks }}"
+  # Security workflows
+  - "{{ '.github/workflows/security.yml' if not _enable_security }}"
+  - "{{ '.github/workflows/coverage.yml' if not _enable_security }}"
+  # AI agent files
   - "{{ '.github/copilot-instructions.md' if ai_coding_agent == 'claude-code' }}"
-  # CLAUDE.md (based on ai_coding_agent)
   - "{{ 'CLAUDE.md' if ai_coding_agent == 'github-copilot' }}"
   - "{{ 'AGENTS.md' if ai_coding_agent == 'github-copilot' }}"
 
@@ -136,6 +148,8 @@ _exclude:
 _tasks:
   - "echo ''"
   - "echo '✅ プロジェクト {{ project_name }} を作成しました！'"
+  - "echo ''"
+  - "echo '📦 プリセット: {{ preset }}'"
   - "echo ''"
   - "echo '📋 セットアップ手順:'"
   - "echo '  1. cd {{ project_slug }}'"

@@ -41,11 +41,13 @@ def get_auth_provider() -> AuthProvider:
         from src.adapters.auth.mock import MockAuthProvider
 
         return MockAuthProvider()
+{%- if _enable_aws_auth %}
 
     elif settings.auth_provider == "cognito":
         from src.adapters.auth.cognito import CognitoAuthProvider
 
         return CognitoAuthProvider()
+{%- endif %}
 
     else:
         raise ValueError(f"Unknown auth provider: {settings.auth_provider}")

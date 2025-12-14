@@ -5,43 +5,12 @@ users in memory. Useful for local development without external
 dependencies.
 """
 
-from dataclasses import dataclass
-{%- if include_advanced_auth %}
 from src.adapters.auth.base import (
     AuthenticationError,
     AuthProvider,
     AuthUser,
     UserExistsError,
 )
-{%- else %}
-
-
-class AuthenticationError(Exception):
-    """Raised when authentication fails."""
-
-    pass
-
-
-class UserExistsError(Exception):
-    """Raised when trying to create a user that already exists."""
-
-    pass
-
-
-@dataclass
-class AuthUser:
-    """Authenticated user information."""
-
-    id: str
-    email: str
-    name: str
-
-    @property
-    def external_id(self) -> str:
-        """Return the external ID (same as id for mock)."""
-        return self.id
-{%- endif %}
-
 from src.core.security import (
     create_access_token,
     decode_access_token,
@@ -50,7 +19,7 @@ from src.core.security import (
 )
 
 
-class MockAuthProvider{%- if include_advanced_auth %}(AuthProvider){%- endif %}:
+class MockAuthProvider(AuthProvider):
     """Mock authentication provider for development.
 
     Stores users in memory with password hashing.

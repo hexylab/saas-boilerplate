@@ -5,10 +5,10 @@ Claude Code / GitHub Copilot を活用したAI駆動開発に最適化されたS
 ## 特徴
 
 - **軽量なベース構成**: 必要最小限のWalking Skeleton（ログイン → ダッシュボード）
-- **オプション選択**: 必要な機能だけを選んで追加可能
+- **プリセット選択**: minimal / standard / aws の3つのプリセットから選択
 - **AI駆動開発対応**: CLAUDE.md, AGENTS.md, copilot-instructions.md 完備
 - **フルスタック**: Next.js (TypeScript) + FastAPI (Python) + PostgreSQL
-- **CI/CD**: GitHub Actions (lint, test, build)
+- **CI/CD**: GitHub Actions (lint, test, build, セキュリティ/監査)
 - **Copier対応**: プロジェクト名等をカスタマイズして生成
 
 ## 技術スタック
@@ -64,18 +64,11 @@ copier copy gh:hexylab/saas-boilerplate ~/my-project
 ? プロジェクト名（例: My SaaS App） My Awesome App
 ? プロジェクトスラッグ my-awesome-app
 ? プロジェクトの説明 AI駆動開発に最適化されたSaaSアプリケーション
-? 作者名 Your Name
-? 作者のメールアドレス you@example.com
-? 使用するAI Codingエージェント Claude Code + GitHub Copilot
-? Playwright E2Eテストを含めますか？ No
-? Cognito認証アダプター（本番用）を含めますか？ No
-? S3ストレージアダプターを含めますか？ No
-? AWS CDKインフラを含めますか？ No
-? 詳細ドキュメント構造を含めますか？ No
-? PRチェックワークフローを含めますか？ No
+? 使用するAI Codingエージェント both
+? プリセットを選択してください standard
 ```
 
-※ AWS関連オプション（Cognito/CDK）を選択した場合のみ、AWSリージョンの選択が表示されます。
+※ `aws` プリセットを選択した場合のみ、AWSリージョンの選択が表示されます。
 
 ### 4. 生成されたプロジェクトをセットアップ
 
@@ -130,28 +123,36 @@ saas-boilerplate/
 | `project_name` | プロジェクト名 | (必須) |
 | `project_slug` | スラッグ（ディレクトリ名等） | project_name から自動生成 |
 | `project_description` | プロジェクトの説明 | AI駆動開発に最適化された... |
-| `author_name` | 作者名 | (必須) |
-| `author_email` | メールアドレス | (空) |
 | `ai_coding_agent` | AI Codingエージェント選択 | both |
+| `preset` | プリセット選択 | standard |
+| `aws_region` | AWSリージョン（awsプリセット時のみ） | ap-northeast-1 |
 
-### オプション機能
+### プリセット
 
-| 変数名 | 説明 | デフォルト |
-|--------|------|-----------|
-| `include_e2e_tests` | Playwright E2Eテスト | false |
-| `include_advanced_auth` | Cognito認証アダプター | false |
-| `include_storage_adapter` | S3ストレージアダプター | false |
-| `include_infrastructure` | AWS CDK インフラ | false |
-| `include_extended_docs` | 詳細ドキュメント構造 | false |
-| `include_pr_checks` | PRチェックワークフロー | false |
-| `aws_region` | AWSリージョン（AWS機能選択時のみ） | ap-northeast-1 |
+| プリセット | 対象 | 含まれる機能 |
+|------------|------|-------------|
+| `minimal` | 学習・PoC | ベース構成のみ |
+| `standard` | チーム開発 | E2E + PRチェック + セキュリティ/監査 + 詳細ドキュメント |
+| `aws` | AWS本番環境 | standard + Cognito認証 + S3ストレージ + CDK |
 
 **ベース構成（常に含まれる）:**
 - Next.js フロントエンド（ログイン + ダッシュボード）
-- FastAPI バックエンド（モック認証）
+- FastAPI バックエンド（モック認証 + ローカルストレージ）
 - Docker Compose 開発環境
 - GitHub Actions CI（lint, test, build）
 - CLAUDE.md / copilot-instructions.md
+
+**standard/awsで追加:**
+- Playwright E2Eテスト
+- PRチェックワークフロー（labeler）
+- セキュリティ/監査ワークフロー（Gitleaks, Trivy, pip-audit, npm audit, ライセンスチェック）
+- カバレッジレポート（PRコメント）
+- 詳細ドキュメント構造
+
+**awsで追加:**
+- AWS Cognito認証アダプター
+- S3ストレージアダプター
+- AWS CDKインフラ
 
 ## テンプレートの更新
 

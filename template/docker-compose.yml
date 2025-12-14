@@ -29,7 +29,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-app}
       AUTH_PROVIDER: ${AUTH_PROVIDER:-mock}
-{%- if include_storage_adapter %}
+{%- if _enable_aws_storage %}
       STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
 {%- endif %}
       LOG_HANDLER: ${LOG_HANDLER:-console}
@@ -39,7 +39,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/src:/app/src:ro
-{%- if include_storage_adapter %}
+{%- if _enable_aws_storage %}
       - backend_storage:/app/storage
 {%- endif %}
     depends_on:
@@ -67,6 +67,6 @@ services:
 
 volumes:
   postgres_data:
-{%- if include_storage_adapter %}
+{%- if _enable_aws_storage %}
   backend_storage:
 {%- endif %}

@@ -1,0 +1,225 @@
+name: Security
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # ====================
+  # Secret Detection
+  # ====================
+  gitleaks:
+    name: Secret Detection (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          GITLEAKS_ENABLE_COMMENTS: false
+
+  # ====================
+  # Dependency Vulnerability Scan
+  # ====================
+  pip-audit:
+    name: Python Dependency Audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Setup Python
+        run: uv python install {% raw %}${{ env.PYTHON_VERSION }}{% endraw %}
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run pip-audit
+        run: uv run pip-audit --require-hashes --disable-pip -r <(uv export --frozen --no-emit-project)
+        continue-on-error: true
+
+  npm-audit:
+    name: Node.js Dependency Audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: {% raw %}${{ env.PNPM_VERSION }}{% endraw %}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: {% raw %}${{ env.NODE_VERSION }}{% endraw %}
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run npm audit
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
+
+  # ====================
+  # Container Scan
+  # ====================
+  trivy-backend:
+    name: Container Scan (Backend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t backend:scan ./backend
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'backend:scan'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          cache-dir: .trivy-cache
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: .trivy-cache
+          key: {% raw %}trivy-db-${{ github.run_id }}{% endraw %}
+          restore-keys: trivy-db-
+
+  trivy-frontend:
+    name: Container Scan (Frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build frontend image
+        run: docker build -t frontend:scan ./frontend
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'frontend:scan'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          cache-dir: .trivy-cache
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: .trivy-cache
+          key: {% raw %}trivy-db-${{ github.run_id }}{% endraw %}
+          restore-keys: trivy-db-
+{%- if _enable_aws_infra %}
+
+  trivy-iac:
+    name: IaC Scan (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy IaC scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'infrastructure'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+{%- endif %}
+
+  # ====================
+  # License Check
+  # ====================
+  license-python:
+    name: License Check (Python)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Setup Python
+        run: uv python install {% raw %}${{ env.PYTHON_VERSION }}{% endraw %}
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Check licenses
+        run: |
+          uv run pip-licenses --format=markdown --output-file=licenses-python.md
+          echo "## Python Dependencies Licenses" >> "$GITHUB_STEP_SUMMARY"
+          cat licenses-python.md >> "$GITHUB_STEP_SUMMARY"
+
+  license-node:
+    name: License Check (Node.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: {% raw %}${{ env.PNPM_VERSION }}{% endraw %}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: {% raw %}${{ env.NODE_VERSION }}{% endraw %}
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install license-checker
+        run: pnpm add -D license-checker-rseidelsohn
+
+      - name: Check licenses
+        run: |
+          pnpm exec license-checker-rseidelsohn --markdown > licenses-node.md
+          echo "## Node.js Dependencies Licenses" >> "$GITHUB_STEP_SUMMARY"
+          cat licenses-node.md >> "$GITHUB_STEP_SUMMARY"

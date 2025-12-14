@@ -10,7 +10,7 @@ frontend:
 backend:
   - changed-files:
       - any-glob-to-any-file: 'backend/**/*'
-{%- if include_infrastructure %}
+{%- if _enable_aws_infra %}
 
 # Infrastructure changes
 infrastructure:

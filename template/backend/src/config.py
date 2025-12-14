@@ -49,12 +49,12 @@ class Settings(BaseSettings):
     secret_key: str
 
     # Providers
-{%- if include_advanced_auth %}
+{%- if _enable_aws_auth %}
     auth_provider: Literal["mock", "cognito"] = "mock"
 {%- else %}
     auth_provider: Literal["mock"] = "mock"
 {%- endif %}
-{%- if include_storage_adapter %}
+{%- if _enable_aws_storage %}
     storage_provider: Literal["local", "s3"] = "local"
 {%- else %}
     storage_provider: Literal["local"] = "local"
@@ -66,15 +66,15 @@ class Settings(BaseSettings):
 
     # CORS
     cors_origins: str = "http://localhost:3000"
-{%- if include_advanced_auth or include_storage_adapter or include_infrastructure %}
+{%- if _enable_aws_auth or _enable_aws_storage or _enable_aws_infra %}
 
     # AWS (required for cognito/s3 providers)
     aws_region: str = "{{ aws_region }}"
-{%- if include_advanced_auth %}
+{%- if _enable_aws_auth %}
     aws_cognito_user_pool_id: str | None = None
     aws_cognito_client_id: str | None = None
 {%- endif %}
-{%- if include_storage_adapter %}
+{%- if _enable_aws_storage %}
     aws_s3_bucket: str | None = None
 {%- endif %}
 {%- endif %}

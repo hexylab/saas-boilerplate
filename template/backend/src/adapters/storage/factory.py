@@ -44,11 +44,13 @@ def get_storage_provider() -> StorageProvider:
         from src.adapters.storage.local import LocalStorageProvider
 
         return LocalStorageProvider()
+{%- if _enable_aws_storage %}
 
     elif settings.storage_provider == "s3":
         from src.adapters.storage.s3 import S3StorageProvider
 
         return S3StorageProvider()
+{%- endif %}
 
     else:
         raise ValueError(f"Unknown storage provider: {settings.storage_provider}")

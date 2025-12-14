@@ -1,0 +1,207 @@
+name: Coverage
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # ====================
+  # Backend Coverage
+  # ====================
+  backend-coverage:
+    name: Backend Coverage
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+      AUTH_PROVIDER: mock
+      STORAGE_PROVIDER: local
+      SECRET_KEY: test-secret-key
+      CORS_ORIGINS: http://localhost:3000
+      LOG_HANDLER: console
+      LOG_LEVEL: WARNING
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Setup Python
+        run: uv python install {% raw %}${{ env.PYTHON_VERSION }}{% endraw %}
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run migrations
+        run: uv run alembic upgrade head
+
+      - name: Run tests with coverage
+        run: |
+          uv run pytest --cov=src --cov-report=term-missing --cov-report=json:coverage.json
+
+      - name: Generate coverage summary
+        id: coverage
+        run: |
+          COVERAGE=$(python -c "import json; data=json.load(open('coverage.json')); print(f\"{data['totals']['percent_covered']:.1f}\")")
+          echo "percent=$COVERAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Create coverage comment
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        env:
+          COVERAGE_PERCENT: {% raw %}${{ steps.coverage.outputs.percent }}{% endraw %}
+        with:
+          script: |
+            const coverage = process.env.COVERAGE_PERCENT;
+            const body = `## Backend Coverage Report
+
+            | Metric | Value |
+            |--------|-------|
+            | Coverage | ${coverage}% |
+
+            <details>
+            <summary>Details</summary>
+
+            Run \`cd backend && uv run pytest --cov=src --cov-report=term-missing\` for detailed report.
+
+            </details>`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('## Backend Coverage Report')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+        continue-on-error: true
+
+  # ====================
+  # Frontend Coverage
+  # ====================
+  frontend-coverage:
+    name: Frontend Coverage
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: {% raw %}${{ env.PNPM_VERSION }}{% endraw %}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: {% raw %}${{ env.NODE_VERSION }}{% endraw %}
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: pnpm test --coverage --coverageReporters=json-summary
+
+      - name: Generate coverage summary
+        id: coverage
+        run: |
+          COVERAGE=$(node -e "const data=require('./coverage/coverage-summary.json'); console.log(data.total.lines.pct.toFixed(1))")
+          echo "percent=$COVERAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Create coverage comment
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        env:
+          COVERAGE_PERCENT: {% raw %}${{ steps.coverage.outputs.percent }}{% endraw %}
+        with:
+          script: |
+            const coverage = process.env.COVERAGE_PERCENT;
+            const body = `## Frontend Coverage Report
+
+            | Metric | Value |
+            |--------|-------|
+            | Line Coverage | ${coverage}% |
+
+            <details>
+            <summary>Details</summary>
+
+            Run \`cd frontend && pnpm test --coverage\` for detailed report.
+
+            </details>`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('## Frontend Coverage Report')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+        continue-on-error: true
